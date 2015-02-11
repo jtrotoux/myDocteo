@@ -1,0 +1,14 @@
+
+{
+  "name": "myDocteoPro",
+  "description": "Raccourcis vers l'espace myDocteo Pro",	  
+  "version": "1.0",
+  "manifest_version": 2,
+
+  "browser_action": {
+    "default_title": "myDocteoPro",
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  }
+
+}
