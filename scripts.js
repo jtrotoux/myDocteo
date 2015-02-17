@@ -1,13 +1,15 @@
 
 var project = 'mydocteopro';
+var currenturl = '';
+var currenttitle = '';
 
 init();
 
 function init() {
-    
+
     handler();
     syncpro();
-    
+
 }
 
 function handler() {
@@ -16,7 +18,18 @@ function handler() {
         addpro();
     });
 
+    $("body").on("click", "button.remove", function() {
+        removepro($(this).data("index"));
+    });
 
+    $("body").on("click", "button.current", function() {
+        addpro(currenttitle,currenturl);
+    });
+
+    chrome.tabs.getSelected(null,function(tab) {
+        currenturl = tab.url;
+        currenttitle= tab.title;
+    });
 
 }
 
@@ -35,25 +48,33 @@ function syncpro() {
 }
 
 function displayPro(index, pro) {
-    $("#pros").append("<li><a href='" + pro.adress + "' target='_blank'>" + pro.name + "</a><button class='remove' onclick='removepro(" + index + ");'>Supprimer</button></li>");
+    $("#pros").append("<li><button class='remove link' index='" + index + "'>x</button><a href='" + pro.adress + "' target='_blank'>" + pro.name + "</a></li>");
 }
 
 function getPros() {
-    return JSON.parse(localStorage[project]);
+    var pros = JSON.parse(localStorage.getItem(project));
+    if (pros == null)
+        pros = new Array();
+    return pros;
 }
 
 function savePros(pros) {
-    localStorage[project] = JSON.stringify(pros);
+    localStorage.setItem(project, JSON.stringify(pros));
 }
 
 function resetForm() {
     $("input").val("");
 }
 
-function addpro() {
+function addpro(name, adress) {
 
-    var name = $("#name").val();
-    var adresse = $("#adress").val();
+    if (!name) {
+        name = $("#name").val();
+    }
+
+    if (!adress) {
+        adress = $("#adress").val();
+    }
 
     if (!name || !adress) {
         return false;
@@ -66,7 +87,7 @@ function addpro() {
     }
 
     // Add pro
-    var pro = {"name": name, "adress": adresse};
+    var pro = {"name": name, "adress": adress};
     pros.push(pro);
 
     // Store pros
@@ -82,13 +103,13 @@ function addpro() {
 
 function removepro(index) {
     // Get Pros
-    var pros = JSON.parse(localStorage[project]);
+    var pros = getPros();
 
     // Remove pro
     pros.splice(index);
 
     // Store pros
-    localStorage[project] = JSON.stringify(pros);
+    savePros(pros);
 
     // Sync
     syncpro();
