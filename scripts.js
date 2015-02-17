@@ -1,27 +1,95 @@
+
 var project = 'mydocteopro';
 
-// Static account (first step)
-var pros = new Array();
-pros.push(new Array('Sylvain Guillet', 'http://www.mydocteo.com/1'));
-pros.push(new Array('Julien Trotoux', 'http://www.mydocteo.com/2'));
+init();
+
+function init() {
+    
+    handler();
+    syncpro();
+    
+}
+
+function handler() {
+
+    $("#add").on("click", function() {
+        addpro();
+    });
 
 
-// Get From LS (next step)
-//var pros = LocalStorage.get(project);
 
-// FI, myDocteo will share these informations while connecting
-//LocalStorage.save(project,pros);
+}
 
-// add link +
-$("body").append("<p><a href='http://www.mydocteo.com/membre/connexion.php' target='_blank'>+ Ajouter un compte</a></p>")
-if (pros.length) {
-    $("body").prepend("<ul/>");
-    for (var x = 0; x < pros.length; x++) {
-        $("ul").append("<li><a href='" + pros[x][1] + "' target='_blank'>" + pros[x][0] + "</a></li>");
+function syncpro() {
+    var pros = getPros();
+    $("#pros").empty();
+    if (pros.length > 0) {
+        $("#nopro").hide();
+        for (var x = 0; x < pros.length; x++) {
+            displayPro(x, pros[x]);
+        }
+    }
+    else {
+        $("#nopro").show();
     }
 }
-// else inform there's no account and force to connect to myDocteo Pro
-else {
-    $("body").prepend("<p>Aucun espace pro n'est configuré<br/><a href='http://www.mydocteo.com'>Connectez-vous</a></p>");
+
+function displayPro(index, pro) {
+    $("#pros").append("<li><a href='" + pro.adress + "' target='_blank'>" + pro.name + "</a><button class='remove' onclick='removepro(" + index + ");'>Supprimer</button></li>");
 }
 
+function getPros() {
+    return JSON.parse(localStorage[project]);
+}
+
+function savePros(pros) {
+    localStorage[project] = JSON.stringify(pros);
+}
+
+function resetForm() {
+    $("input").val("");
+}
+
+function addpro() {
+
+    var name = $("#name").val();
+    var adresse = $("#adress").val();
+
+    if (!name || !adress) {
+        return false;
+    }
+
+    // Get pros
+    var pros = getPros();
+    if (typeof (pros) == "undefined") {
+        pros = new Array();
+    }
+
+    // Add pro
+    var pro = {"name": name, "adress": adresse};
+    pros.push(pro);
+
+    // Store pros
+    savePros(pros);
+
+    // Reset form
+    resetForm();
+
+    // Sync
+    syncpro();
+
+}
+
+function removepro(index) {
+    // Get Pros
+    var pros = JSON.parse(localStorage[project]);
+
+    // Remove pro
+    pros.splice(index);
+
+    // Store pros
+    localStorage[project] = JSON.stringify(pros);
+
+    // Sync
+    syncpro();
+}
